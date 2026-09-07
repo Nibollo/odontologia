@@ -8,7 +8,7 @@ export default function NewStaff() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  
+
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -47,7 +47,7 @@ export default function NewStaff() {
 
       <form onSubmit={handleSubmit} style={{ background: 'var(--card-bg)', padding: '2rem', borderRadius: '12px', border: '1px solid var(--border)', maxWidth: '500px' }}>
         <p style={{ color: 'var(--text-muted)', marginBottom: '1.5rem', fontSize: '0.875rem' }}>
-          Tú asignarás la contraseña temporal. El empleado deberá usar su correo y esta contraseña para iniciar sesión en {typeof window !== 'undefined' ? window.location.hostname : 'el sistema'}.
+          Tú asignarás la contraseña temporal. El empleado deberá usar su correo y esta contraseña para iniciar sesión en el sistema.
         </p>
 
         {error && <div style={{ background: 'var(--error-bg)', color: 'var(--error)', padding: '1rem', borderRadius: '8px', marginBottom: '1.5rem' }}>{error}</div>}

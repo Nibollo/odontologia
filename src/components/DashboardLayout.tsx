@@ -1,11 +1,18 @@
 'use client';
 
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import styles from './DashboardLayout.module.css';
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
+  const router = useRouter();
+
+  const handleLogout = async () => {
+    await fetch('/api/auth/logout', { method: 'POST' });
+    router.push('/login');
+    router.refresh();
+  };
 
   const navItems = [
     { name: 'Dashboard', path: '/dashboard', hint: 'Resumen' },
@@ -63,6 +70,14 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                 <span className={styles.profileRole}>Clinica principal</span>
               </span>
             </div>
+            <button
+              type="button"
+              onClick={handleLogout}
+              className={styles.logoutButton}
+              title="Cerrar sesión"
+            >
+              Cerrar sesión
+            </button>
           </div>
         </header>
         <div className={styles.content}>{children}</div>

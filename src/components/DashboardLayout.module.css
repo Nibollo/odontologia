@@ -199,6 +199,24 @@
   color: var(--text-muted);
 }
 
+.logoutButton {
+  padding: 0.55rem 0.9rem;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: rgba(255, 255, 255, 0.9);
+  color: var(--text-muted);
+  font-weight: 700;
+  font-size: 0.82rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.logoutButton:hover {
+  color: var(--foreground);
+  background: rgba(255, 255, 255, 1);
+  border-color: var(--primary);
+}
+
 .content {
   padding: 1.65rem;
   flex: 1;
