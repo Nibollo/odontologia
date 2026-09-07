@@ -1,0 +1,219 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Clinic {
+  id          String        @id @default(uuid())
+  name        String
+  slug        String        @unique
+  createdAt   DateTime      @default(now())
+  users        User[]
+  patients     Patient[]
+  appointments Appointment[]
+}
+
+model User {
+  id           String        @id @default(uuid())
+  clinicId     String
+  name         String
+  email        String        @unique
+  passwordHash String
+  role         Role          @default(DENTIST)
+  clinic       Clinic        @relation(fields: [clinicId], references: [id])
+  appointments Appointment[]
+  treatments    Treatment[]
+  treatmentItems TreatmentItem[]
+  clinicalEpisodes ClinicalEpisode[]
+  odontogramEntries OdontogramEntry[]
+}
+
+enum Role {
+  ADMIN
+  DENTIST
+  ASSISTANT
+}
+
+model Patient {
+  id                    String        @id @default(uuid())
+  clinicId              String
+  firstName             String
+  lastName              String
+  phone                 String?
+  email                 String?
+  birthDate             DateTime?
+  gender                String?
+  address               String?
+  city                  String?
+  country               String?
+  isForeigner           Boolean       @default(false)
+  familyDoctor          String?
+  insuranceName         String?
+  communicationLanguage String?
+  profileImagePath      String?
+  documentType          String?
+  documentId            String?
+  annotations           String?
+  odontogramState       Json?
+  odontogramSummary     Json?
+  odontogramUpdatedAt   DateTime?
+  generalInfo           Json?
+  medicalInfo           Json?
+  clinic                Clinic        @relation(fields: [clinicId], references: [id])
+  appointments          Appointment[]
+  treatments            Treatment[]
+  treatmentItems        TreatmentItem[]
+  clinicalEpisodes      ClinicalEpisode[]
+  clinicalFindings      ClinicalFinding[]
+  odontogramEntries     OdontogramEntry[]
+}
+
+model Appointment {
+  id         String     @id @default(uuid())
+  clinicId   String
+  patientId  String
+  dentistId  String
+  startTime  DateTime
+  endTime    DateTime
+  status     ApptStatus @default(SCHEDULED)
+  notes      String?
+  clinic     Clinic     @relation(fields: [clinicId], references: [id])
+  patient    Patient    @relation(fields: [patientId], references: [id])
+  dentist    User       @relation(fields: [dentistId], references: [id])
+}
+
+enum ApptStatus {
+  SCHEDULED
+  CONFIRMED
+  COMPLETED
+  CANCELLED
+}
+
+enum ClinicalEpisodeType {
+  EXAM
+  PERIODONTAL_CONTROL
+  TREATMENT_VISIT
+  EMERGENCY
+}
+
+enum ClinicalFindingScope {
+  TOOTH
+  SURFACE
+  ROOT
+  ARCH
+  GENERAL
+}
+
+enum ClinicalFindingStatus {
+  ACTIVE
+  RESOLVED
+  PLANNED
+  HISTORICAL
+}
+
+enum TreatmentItemStatus {
+  PROPOSED
+  PLANNED
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+}
+
+model Treatment {
+  id          String   @id @default(uuid())
+  patientId   String
+  dentistId   String
+  toothNumber String?  // Número FDI
+  surface     String?  // 'V', 'M', 'D', 'P', 'L', 'O', 'ROOT'
+  description String
+  cost        Float?
+  status      String   @default("COMPLETED") // COMPLETED, PLANNED
+  createdAt   DateTime @default(now())
+  
+  patient     Patient  @relation(fields: [patientId], references: [id])
+  dentist     User     @relation(fields: [dentistId], references: [id])
+}
+
+model ClinicalEpisode {
+  id        String              @id @default(uuid())
+  patientId String
+  dentistId String?
+  type      ClinicalEpisodeType @default(EXAM)
+  title     String?
+  note      String?
+  snapshot  Json?
+  summary   Json?
+  createdAt DateTime            @default(now())
+
+  patient   Patient             @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  dentist   User?               @relation(fields: [dentistId], references: [id], onDelete: SetNull)
+  findings  ClinicalFinding[]
+  treatments TreatmentItem[]
+
+  @@index([patientId, createdAt])
+}
+
+model ClinicalFinding {
+  id          String                @id @default(uuid())
+  patientId   String
+  episodeId   String?
+  toothNumber String?
+  surfaceCode String?
+  scope       ClinicalFindingScope
+  code        String
+  label       String
+  category    String
+  severity    String?
+  status      ClinicalFindingStatus @default(ACTIVE)
+  payload     Json?
+  notedAt     DateTime              @default(now())
+  resolvedAt  DateTime?
+
+  patient     Patient               @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  episode     ClinicalEpisode?      @relation(fields: [episodeId], references: [id], onDelete: SetNull)
+
+  @@index([patientId, toothNumber, surfaceCode])
+  @@index([patientId, status, category])
+}
+
+model TreatmentItem {
+  id            String              @id @default(uuid())
+  patientId     String
+  episodeId     String?
+  dentistId     String?
+  toothNumber   String?
+  surfaceCode   String?
+  diagnosisCode String?
+  title         String
+  description   String?
+  status        TreatmentItemStatus @default(PROPOSED)
+  estimatedCost Float?
+  actualCost    Float?
+  createdAt     DateTime            @default(now())
+  completedAt   DateTime?
+
+  patient       Patient             @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  episode       ClinicalEpisode?    @relation(fields: [episodeId], references: [id], onDelete: SetNull)
+  dentist       User?               @relation(fields: [dentistId], references: [id], onDelete: SetNull)
+
+  @@index([patientId, status, createdAt])
+}
+
+model OdontogramEntry {
+  id          String   @id @default(uuid())
+  patientId   String
+  dentistId   String?
+  label       String?
+  note        String?
+  summary     Json?
+  state       Json
+  createdAt   DateTime @default(now())
+
+  patient     Patient  @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  dentist     User?    @relation(fields: [dentistId], references: [id], onDelete: SetNull)
+
+  @@index([patientId, createdAt])
+}

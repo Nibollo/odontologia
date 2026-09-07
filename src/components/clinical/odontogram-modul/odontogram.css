@@ -1,0 +1,1021 @@
+
+:root{
+  --bg: var(--odon-bg, #f3f6fb);
+  --panel: var(--odon-panel, #ffffff);
+  --card: var(--odon-card, #ffffff);
+  --muted: var(--odon-muted, #5b6b7d);
+  --text: var(--odon-text, #1e2a3a);
+  --line: var(--odon-line, #d7e0ec);
+  --accent: var(--odon-accent, #3b7bff);
+  --accent2: var(--odon-accent2, #12b981);
+}
+/* When themeConfig is applied via JS, --odon-* properties are set on .odontogram-root.
+   Re-resolve the shorthand variables so children pick up the overrides. */
+.odontogram-root{
+  --bg: #f4f7fb;
+  --panel: #ffffff;
+  --card: #ffffff;
+  --muted: #6b7280;
+  --text: #182230;
+  --line: #dbe4ee;
+  --accent: #0f766e;
+  --accent2: #22c55e;
+  color: var(--text);
+}
+.dark .odontogram-root{
+  --bg: var(--odon-bg, #0f172a);
+  --panel: var(--odon-panel, #1e293b);
+  --card: var(--odon-card, #1e293b);
+  --muted: var(--odon-muted, #94a3b8);
+  --text: var(--odon-text, #f1f5f9);
+  --line: var(--odon-line, #334155);
+}
+/* Scoped to odontogram root */
+.odontogram-root {
+  box-sizing: border-box;
+  font-family: inherit;
+  color: var(--text);
+}
+.odon-topbar{
+  display:flex; align-items:center; justify-content:space-between;
+  padding:14px 18px;
+  border-bottom:1px solid var(--line);
+  background: rgba(255,255,255,.85);
+  backdrop-filter: blur(10px);
+  position:sticky; top:0; z-index:10;
+}
+.odon-brand{display:flex; gap:12px; align-items:center}
+.odon-dot{width:10px;height:10px;border-radius:999px;background:var(--accent2); box-shadow:0 0 0 6px rgba(18,185,129,.12);}
+.odon-title{font-weight:700; letter-spacing:.2px}
+.odon-subtitle{font-size:12px; color:var(--muted); margin-top:2px}
+.odon-topbar-actions{display:flex; gap:10px; align-items:center; flex-wrap:wrap}
+.odon-topbar-group{display:flex; align-items:center; gap:8px}
+.odon-segmented{display:flex; gap:6px}
+.odon-btn{
+  border:1px solid var(--line);
+  color:var(--text);
+  background: white;
+  padding:8px 12px; border-radius:999px;
+  cursor:pointer; font-weight:700;
+  transition: all 0.2s ease;
+}
+.odon-btn-sm{
+  padding:6px 10px;
+  font-size:12px;
+}
+.odon-btn:hover{background: var(--bg); border-color: var(--accent)}
+.odon-btn-ghost{background:rgba(0,0,0,.04)}
+.odon-btn-ghost:hover{background:rgba(0,0,0,.08)}
+.btn-danger{
+  background: rgba(217,69,69,.12);
+  border-color: rgba(217,69,69,.4);
+  color:#b83a3a;
+}
+.btn-danger:hover{background: rgba(217,69,69,.2)}
+.odon-btn-toggle[aria-pressed="true"]{
+  background: rgb(100 15 235 / 20%);
+  border-color: rgba(18,185,129,.5);
+}
+.odon-btn-toggle[aria-pressed="false"]{
+  background: rgba(0,0,0,.04);
+}
+
+.odon-dropdown{position:relative}
+.odon-dropdown-menu{
+  position:absolute;
+  right:0;
+  top:100%;
+  margin-top:6px;
+  background: #fff;
+  border:1px solid var(--line);
+  border-radius:12px;
+  box-shadow: 0 12px 24px rgba(30,42,58,.12);
+  padding:6px;
+  display:flex;
+  flex-direction:column;
+  gap:4px;
+  min-width:180px;
+  z-index:20;
+}
+.odon-dropdown-item{
+  border:1px solid var(--line);
+  background: rgba(0,0,0,.04);
+  color: var(--text);
+  padding:8px 10px;
+  border-radius:10px;
+  font-weight:600;
+  cursor:pointer;
+  text-align:left;
+}
+.odon-dropdown-item:hover{background: rgba(0,0,0,.08)}
+.odon-dropdown-item[aria-checked="true"]{
+  background: rgba(59,123,255,.18);
+  border-color: rgba(59,123,255,.45);
+}
+
+select{
+  appearance: none;
+  border:1px solid var(--line);
+  background:rgba(59,123,255,.12);
+  color:var(--text);
+  padding:8px 34px 8px 12px;
+  border-radius:12px;
+  font-weight:600;
+  min-width:220px;
+  cursor:pointer;
+  background-image:
+    linear-gradient(45deg, transparent 50%, var(--text) 50%),
+    linear-gradient(135deg, var(--text) 50%, transparent 50%);
+  background-position:
+    calc(100% - 18px) 52%,
+    calc(100% - 12px) 52%;
+  background-size: 6px 6px, 6px 6px;
+  background-repeat:no-repeat;
+}
+select:focus{
+  outline:none;
+  box-shadow: 0 0 0 3px rgba(59,123,255,.18);
+}
+
+.odon-layout{
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  padding: 0;
+}
+.odon-chart{
+  background: white;
+  border:1px solid var(--line);
+  border-radius:var(--radius-md, 18px);
+  box-shadow: var(--shadow-sm);
+  overflow-x:auto;
+  overflow-y:hidden;
+  min-width: 0;
+  width: 100%;
+}
+.odon-chart-header{
+  padding: 16px 18px;
+  border-bottom:1px solid var(--line);
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  flex-wrap: wrap;
+}
+.odon-chart-title{font-weight:700}
+.odon-chart-hint{font-size:12px;color:var(--muted); margin-top:4px}
+.odon-chart-actions{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  flex-wrap: wrap;
+}
+.odon-chart-actions .odon-btn{
+  min-height: 46px;
+}
+
+.odon-tooth-grid{
+  display:grid;
+  grid-template-columns: repeat(16, minmax(50px, 1fr));
+  gap:8px;
+  padding:16px 8px 20px;
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+}
+.odon-tooth-label-row{
+  display:contents;
+}
+.odon-tooth-label-cell{
+  text-align:center;
+  font-size:11px;
+  color:rgba(30,42,58,.8);
+  padding:2px 0 4px;
+  font-weight:600;
+  cursor:pointer;
+}
+.odon-tooth-label-cell:hover{color:rgba(30,42,58,1)}
+.odon-tooth-tile{
+  position:relative;
+  border:1px solid var(--line);
+  border-radius:var(--radius-sm, 10px);
+  background: white;
+  padding:2px;
+  cursor:pointer;
+  transition: all 0.2s ease;
+  min-height:156px;
+}
+.odon-tooth-tile.occl-view{
+  min-height:112px;
+}
+.odon-tooth-tile.placeholder{
+  cursor:default;
+  background: rgba(255,255,255,.3);
+}
+.odon-tooth-tile.placeholder .odon-tooth-svg svg{
+  opacity:0;
+}
+.odon-tooth-tile:hover{background: rgba(59,123,255,.08)}
+.odon-tooth-tile:active{transform: scale(.99)}
+
+/* ── Selection animation ─────────────────────── */
+@keyframes odon-dash-pulse{
+  0%, 100%{ border-color: rgba(59,123,255,.5); }
+  50%{ border-color: rgba(59,123,255,.9); }
+}
+@keyframes odon-glow-pulse{
+  0%, 100%{ filter: drop-shadow(0 0 3px rgba(59,123,255,.2)); }
+  50%{ filter: drop-shadow(0 0 7px rgba(59,123,255,.45)); }
+}
+.odon-tooth-tile::after{
+  content: "";
+  position: absolute;
+  inset: -2px;
+  border-radius: 15px;
+  border: 2px dashed transparent;
+  pointer-events: none;
+  transition: border-color .25s ease;
+}
+.odon-tooth-tile .odon-tooth-svg svg{
+  transition: filter .25s ease;
+}
+.odon-tooth-tile.active{
+  border-color: rgba(59,123,255,.7);
+  background: rgba(59,123,255,.06);
+  transition: border-color .2s ease, background .2s ease;
+}
+.odon-tooth-tile.active::after{
+  border-color: rgba(59,123,255,.55);
+  animation: odon-dash-pulse 1.6s ease-in-out infinite;
+}
+.odon-tooth-tile.active .odon-tooth-svg svg{
+  filter: drop-shadow(0 0 4px rgba(59,123,255,.3));
+  animation: odon-glow-pulse 2.5s ease-in-out infinite;
+}
+
+/* ── Focus-visible (keyboard a11y) ───────────── */
+.odon-tooth-tile:focus{outline:none}
+.odon-tooth-tile:focus-visible{
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 3px rgba(59,123,255,.25);
+  z-index: 1;
+}
+
+/* ── Read-only mode ──────────────────────────── */
+.odon-tooth-grid.read-only .odon-tooth-tile{
+  cursor: default;
+  pointer-events: none;
+}
+.odon-tooth-grid.read-only .odon-tooth-tile:hover{
+  background: inherit;
+}
+.odon-tooth-grid.read-only .odon-tooth-label-cell{
+  cursor: default;
+  pointer-events: none;
+}
+.odon-panel.read-only{
+  pointer-events: none;
+  opacity: 0.5;
+  user-select: none;
+}
+
+@media (prefers-reduced-motion: reduce){
+  .odon-tooth-tile.active::after{
+    animation: none;
+    border-color: rgba(59,123,255,.7);
+  }
+  .odon-tooth-tile.active .odon-tooth-svg svg{
+    animation: none;
+    filter: drop-shadow(0 0 4px rgba(59,123,255,.35));
+  }
+}
+.odon-tooth-svg{
+  width:100%;
+  height:148px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+.odon-tooth-svg svg{width:86px;height:140px; pointer-events:none}
+.odon-tooth-tile.occl-view .odon-tooth-svg{height:96px}
+.odon-tooth-tile.occl-view .odon-tooth-svg svg{width:74px;height:74px}
+.odon-tooth-tile.tpl-14 .odon-tooth-svg svg{width:80px;height:132px}
+.odon-tooth-tile.tpl-11 .odon-tooth-svg svg,
+.odon-tooth-tile.tpl-13 .odon-tooth-svg svg{width:72px;height:116px}
+.odon-tooth-tile.odon-wisdom-hidden{opacity:.45; pointer-events:none}
+.odon-tooth-tile.odon-wisdom-hidden .odon-tooth-svg svg{opacity:0}
+.odon-tooth-tile.odon-occl-hidden{display:none !important}
+.odon-tooth-svg [data-active="0"]{display:none !important}
+
+.odon-panel{
+  background: var(--card-bg, #ffffff);
+  border:1px solid var(--line);
+  border-radius:var(--radius-md, 18px);
+  box-shadow: var(--shadow-sm);
+  overflow:hidden;
+}
+.odon-panel-top{
+  overflow: visible;
+}
+.odon-panel-header{
+  padding: 16px 18px;
+  border-bottom:1px solid var(--line);
+  background: linear-gradient(180deg, rgba(247, 251, 255, 0.96), rgba(255, 255, 255, 0.98));
+}
+.odon-select-actions{
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+  margin-top:8px;
+}
+.odon-select-actions-row{
+  display:flex;
+  flex-wrap:wrap;
+  gap:6px;
+}
+.odon-status-actions{
+  flex-wrap:wrap;
+  gap:6px;
+}
+.odon-status-extra-row{
+  align-items:center;
+  gap:8px;
+  flex-wrap:wrap;
+}
+.odon-status-extra-row select{
+  min-width: 220px;
+}
+.odon-btn-icon{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:8px;
+  padding:9px 15px;
+  font-size:12px;
+}
+.odon-btn-icon .icon,
+.odon-btn-icon .icon-img,
+.odon-btn-icon svg{
+  width:32px;
+  height:32px;
+  display:block;
+  flex-shrink:0;
+}
+.odon-btn-label{
+  font-size:12px;
+  font-weight:700;
+  line-height:1.1;
+  white-space:nowrap;
+}
+.odon-fade-toggle{
+  transition: opacity 160ms ease, max-width 160ms ease, padding 160ms ease, margin 160ms ease, border-width 160ms ease, transform 160ms ease;
+  max-width: 200px;
+}
+.odon-fade-toggle.is-hidden{
+  opacity:0;
+  pointer-events:none;
+  max-width:0;
+  padding-left:0;
+  padding-right:0;
+  margin:0;
+  border-width:0;
+  transform:scale(0.96);
+}
+.odon-panel-title-row{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+}
+.odon-panel-title-actions{
+  display:flex;
+  align-items:center;
+  gap:8px;
+}
+.odon-panel-title{font-weight:800}
+.odon-panel-subtitle{font-size:12px;color:var(--muted); margin-top:4px}
+.odon-pill{
+  display:inline-block;
+  background: rgba(18,185,129,.14);
+  border:1px solid rgba(18,185,129,.25);
+  padding:2px 8px;
+  border-radius:999px;
+  font-weight:700;
+  color: var(--text);
+}
+.odon-warnings{margin-top:10px; display:flex; flex-direction:column; gap:8px}
+.odon-warning{
+  font-size:12px; color:#8a5b1a;
+  border:1px solid rgba(255,198,116,.45);
+  background: rgba(255,198,116,.22);
+  padding:8px 10px; border-radius:12px;
+}
+.odon-panel-body{
+  padding: 16px 18px 18px;
+  display: grid;
+  grid-template-columns: repeat(1, minmax(0, 1fr));
+  gap: 14px;
+}
+.odon-card{
+  background: var(--card-muted, #f8fafc);
+  border:1px solid var(--line);
+  border-radius:var(--radius-sm, 12px);
+  padding:14px;
+  min-width: 0;
+}
+.odon-card-title{font-weight:800; margin-bottom:8px}
+.odon-card-title-row{display:flex; align-items:center; justify-content:space-between; gap:8px}
+.odon-card.collapsed .odon-card-title{margin-bottom:0}
+.odon-card.collapsed .odon-card-body,
+.odon-card.collapsed #statusCardBody,
+.odon-card.collapsed .odon-status-extra-row,
+.odon-card.collapsed .odon-hint,
+.odon-card.collapsed .odon-row,
+.odon-card.collapsed .odon-check-grid,
+.odon-card.collapsed label{display:none}
+.odon-icon-btn{
+  border:1px solid var(--line);
+  background: rgba(255,255,255,.7);
+  color: var(--text);
+  border-radius:999px;
+  width:28px;
+  height:28px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  cursor:pointer;
+  font-weight:700;
+  line-height:1;
+}
+.odon-icon-btn .icon{width:16px;height:16px}
+.odon-icon-btn:hover{background: rgba(59,123,255,.12)}
+.icon-btn-danger{
+  color:#d94545;
+  border-color: rgba(217,69,69,.4);
+  background: rgba(217,69,69,.08);
+}
+.icon-btn-danger:hover{background: rgba(217,69,69,.15)}
+.odon-card-subtitle{font-weight:700; margin:6px 0}
+.odon-hint{font-size:12px;color:var(--muted); margin:6px 0 10px}
+.odon-row{display:flex; gap:10px; align-items:center; font-size:13px; padding:6px 2px}
+.odon-contact-row{margin-bottom:6px}
+.odon-bruxism-row{margin-top:6px; gap:8px}
+.odon-fissure-row{margin-top:10px; justify-content:center; text-align:center}
+#crownReplaceRow,#crownNeededRow,#missingClosedRow{margin-top:8px}
+.odon-bridge-pillar-row{margin-top:10px}
+.odon-inline-checks{padding:0}
+.odon-inline-checks label{display:flex; gap:10px; align-items:center; font-size:13px; padding:6px 10px; border-radius:12px; border:1px solid var(--line); background: rgba(0,0,0,.02); cursor:pointer}
+.odon-inline-checks label:hover{background: rgba(59,123,255,.06)}
+.odon-inline-checks input[type="checkbox"]{display:none}
+.odon-inline-checks label:has(input[type="checkbox"]:checked){
+  background: rgba(18,185,129,.18);
+  border-color: rgba(18,185,129,.5);
+}
+.odon-check-grid{display:grid; grid-template-columns: 1fr 1fr; gap:8px}
+.odon-check-grid label{display:flex; gap:10px; align-items:center; font-size:13px; padding:6px 8px; border-radius:12px; border:1px solid var(--line); background: rgba(0,0,0,.02); cursor:pointer}
+.odon-check-grid label:hover{background: rgba(59,123,255,.06)}
+.odon-check-grid input[type="checkbox"]{display:none}
+.odon-check-grid label:has(input[type="checkbox"]:checked){
+  background: rgba(18,185,129,.18);
+  border-color: rgba(18,185,129,.5);
+}
+.odon-row input[type="checkbox"]{display:none}
+.odon-row:has(input[type="checkbox"]){
+  border-radius:12px;
+  border:1px solid var(--line);
+  padding:6px 10px;
+  background: rgba(0,0,0,.02);
+  cursor:pointer;
+}
+.odon-inline-checks:has(input[type="checkbox"]){
+  border:0;
+  background:none;
+  padding:0;
+}
+.odon-row:has(input[type="checkbox"]:checked){
+  background: rgba(18,185,129,.18);
+  border-color: rgba(18,185,129,.5);
+}
+.odon-inline-checks:has(input[type="checkbox"]:checked){
+  background:none;
+  border:0;
+}
+.odon-radio-list{display:flex; flex-direction:column; gap:8px}
+.odon-radio-list label{display:flex; gap:10px; align-items:center; font-size:13px; padding:6px 8px; border-radius:12px; border:1px solid var(--line); background: rgba(0,0,0,.02)}
+.odon-radio-list label:hover{background: rgba(59,123,255,.06)}
+.odon-divider{height:1px;background:var(--line); margin:10px 0}
+.hidden{display:none !important}
+
+@media (min-width: 900px){
+  .odon-panel-body{
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1280px){
+  .odon-panel-body{
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    align-items: start;
+  }
+  .odon-chart{
+    min-height: 860px;
+  }
+  .odon-tooth-grid{
+    grid-template-columns: repeat(16, minmax(56px, 1fr));
+    gap: 10px;
+    padding: 18px 22px 24px;
+  }
+  .odon-tooth-tile{
+    min-height: 158px;
+  }
+  .odon-tooth-tile.occl-view{
+    min-height: 108px;
+  }
+  .odon-tooth-svg{
+    height: 176px;
+  }
+  .odon-tooth-svg svg{
+    width: 98px;
+    height: 164px;
+  }
+  .odon-tooth-tile.tpl-14 .odon-tooth-svg svg{
+    width: 92px;
+    height: 154px;
+  }
+  .odon-tooth-tile.tpl-11 .odon-tooth-svg svg,
+  .odon-tooth-tile.tpl-13 .odon-tooth-svg svg{
+    width: 80px;
+    height: 134px;
+  }
+  .odon-tooth-tile.occl-view .odon-tooth-svg{
+    height: 112px;
+  }
+  .odon-tooth-tile.occl-view .odon-tooth-svg svg{
+    width: 84px;
+    height: 84px;
+  }
+}
+
+@media (max-width: 1100px){
+  .odon-panel-body{
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 760px){
+  .odon-chart-header,
+  .odon-panel-header{
+    padding: 14px;
+  }
+  .odon-panel-body{
+    padding: 14px;
+  }
+  .odon-tooth-grid{
+    grid-template-columns: repeat(8, minmax(44px, 1fr));
+    gap: 8px;
+    padding: 14px;
+  }
+  .odon-tooth-tile{
+    min-height: 118px;
+  }
+  .odon-tooth-svg{
+    height: 132px;
+  }
+  .odon-tooth-svg svg{
+    width: 78px;
+    height: 128px;
+  }
+}
+
+/* ── Dark mode ────────────────────────────────── */
+.dark{
+  --bg: var(--odon-bg, #0f172a);
+  --panel: var(--odon-panel, #1e293b);
+  --card: var(--odon-card, #1e293b);
+  --muted: var(--odon-muted, #94a3b8);
+  --text: var(--odon-text, #f1f5f9);
+  --line: var(--odon-line, #334155);
+}
+.dark body{
+  background: var(--bg);
+}
+.dark .odon-topbar{
+  background: rgba(15,23,42,.92);
+  backdrop-filter: blur(10px);
+}
+.dark .odon-btn{
+  background: rgba(96,165,250,.15);
+}
+.dark .odon-btn:hover{background: rgba(96,165,250,.25)}
+.dark .odon-btn-ghost{background: rgba(255,255,255,.06)}
+.dark .odon-btn-ghost:hover{background: rgba(255,255,255,.12)}
+.dark .btn-danger{
+  background: rgba(248,113,113,.12);
+  border-color: rgba(248,113,113,.3);
+  color:#f87171;
+}
+.dark .btn-danger:hover{background: rgba(248,113,113,.22)}
+.dark .odon-btn-toggle[aria-pressed="false"]{background: rgba(255,255,255,.06)}
+.dark .odon-dropdown-menu{
+  background:#1e293b;
+  box-shadow: 0 12px 24px rgba(0,0,0,.45);
+}
+.dark .odon-dropdown-item{background: rgba(255,255,255,.06)}
+.dark .odon-dropdown-item:hover{background: rgba(255,255,255,.12)}
+.dark .odon-dropdown-item[aria-checked="true"]{
+  background: rgba(96,165,250,.2);
+  border-color: rgba(96,165,250,.45);
+}
+.dark select{
+  background: rgba(96,165,250,.15);
+  background-image:
+    linear-gradient(45deg, transparent 50%, var(--text) 50%),
+    linear-gradient(135deg, var(--text) 50%, transparent 50%);
+  background-position:
+    calc(100% - 18px) 52%,
+    calc(100% - 12px) 52%;
+  background-size: 6px 6px, 6px 6px;
+  background-repeat:no-repeat;
+}
+.dark .odon-chart{background: rgba(30,41,59,.9)}
+.dark .odon-tooth-label-cell{color: rgba(241,245,249,.6)}
+.dark .odon-tooth-label-cell:hover{color: rgba(241,245,249,1)}
+.dark .odon-tooth-tile{background: rgba(30,41,59,.7)}
+.dark .odon-tooth-tile.placeholder{background: rgba(30,41,59,.3)}
+.dark .odon-tooth-tile:hover{background: rgba(96,165,250,.12)}
+/* Dark selection animation */
+@keyframes odon-dash-pulse-dark{
+  0%, 100%{ border-color: rgba(96,165,250,.45); }
+  50%{ border-color: rgba(96,165,250,.85); }
+}
+@keyframes odon-glow-pulse-dark{
+  0%, 100%{ filter: drop-shadow(0 0 3px rgba(96,165,250,.2)); }
+  50%{ filter: drop-shadow(0 0 7px rgba(96,165,250,.45)); }
+}
+.dark .odon-tooth-tile.active{
+  border-color: rgba(96,165,250,.6);
+  background: rgba(96,165,250,.08);
+}
+.dark .odon-tooth-tile.active::after{
+  border-color: rgba(96,165,250,.45);
+  animation-name: odon-dash-pulse-dark;
+}
+.dark .odon-tooth-tile.active .odon-tooth-svg svg{
+  animation-name: odon-glow-pulse-dark;
+  filter: drop-shadow(0 0 4px rgba(96,165,250,.3));
+}
+.dark .odon-tooth-tile:focus-visible{
+  outline-color: rgba(96,165,250,.8);
+  box-shadow: 0 0 0 3px rgba(96,165,250,.25);
+}
+/* Dark note popover */
+.dark .odon-note-backdrop{background: rgba(0,0,0,.55)}
+.dark .odon-note-popover{background: var(--panel); box-shadow: 0 16px 48px rgba(0,0,0,.5)}
+.dark .odon-note-textarea{background: rgba(255,255,255,.06); border-color: var(--line); color: var(--text)}
+.dark .odon-note-textarea:focus{box-shadow: 0 0 0 3px rgba(96,165,250,.2); border-color: rgba(96,165,250,.5)}
+.dark .odon-panel{background: rgba(30,41,59,.95)}
+.dark .odon-card{background: rgba(30,41,59,.8); border-color: var(--line)}
+.dark .odon-icon-btn{background: rgba(30,41,59,.7)}
+.dark .odon-icon-btn:hover{background: rgba(96,165,250,.15)}
+.dark .icon-btn-danger{
+  color:#f87171;
+  border-color: rgba(248,113,113,.3);
+  background: rgba(248,113,113,.1);
+}
+.dark .icon-btn-danger:hover{background: rgba(248,113,113,.2)}
+.dark .odon-warning{
+  color:#fbbf24;
+  border-color: rgba(251,191,36,.3);
+  background: rgba(251,191,36,.1);
+}
+.dark .odon-inline-checks label,
+.dark .odon-check-grid label,
+.dark .odon-radio-list label{background: rgba(255,255,255,.04)}
+.dark .odon-inline-checks label:hover,
+.dark .odon-check-grid label:hover,
+.dark .odon-radio-list label:hover{background: rgba(96,165,250,.1)}
+.dark .odon-row:has(input[type="checkbox"]){background: rgba(255,255,255,.04)}
+.dark .odon-pill{
+  background: rgba(52,211,153,.15);
+  border-color: rgba(52,211,153,.3);
+}
+/* Theme toggle button */
+.btn-theme{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  width:36px;
+  height:36px;
+  padding:0;
+  border:1px solid var(--line);
+  border-radius:12px;
+  background: rgba(0,0,0,.04);
+  color:var(--text);
+  cursor:pointer;
+  transition: background .15s ease;
+}
+.btn-theme:hover{background: rgba(59,123,255,.12)}
+.dark .btn-theme{background: rgba(255,255,255,.06)}
+.dark .btn-theme:hover{background: rgba(96,165,250,.15)}
+
+/* ── Note icon in label cell ─────────────────── */
+.odon-tooth-note-icon{
+  display: inline-block;
+  font-size: 9px;
+  margin-left: 2px;
+  vertical-align: middle;
+  opacity: .75;
+}
+
+/* ── Note editor popover ─────────────────────── */
+.odon-note-backdrop{
+  position: fixed; inset: 0; z-index: 120;
+  background: rgba(0,0,0,.35);
+  animation: odon-fade-in .12s ease;
+}
+.odon-note-popover{
+  position: relative;
+  background: var(--panel, #fff);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  box-shadow: 0 16px 48px rgba(0,0,0,.2);
+  padding: 14px;
+  width: min(320px, 90vw);
+  display: flex; flex-direction: column; gap: 10px;
+  animation: odon-ctx-pop .12s ease;
+}
+.odon-note-header{
+  display: flex; align-items: center; justify-content: space-between;
+}
+.odon-note-title{
+  font-weight: 700; font-size: 14px; color: var(--text);
+}
+.odon-note-textarea{
+  width: 100%;
+  min-height: 60px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 8px 10px;
+  font-family: inherit;
+  font-size: 13px;
+  color: var(--text);
+  background: rgba(0,0,0,.02);
+  resize: vertical;
+}
+.odon-note-textarea:focus{
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(59,123,255,.18);
+  border-color: rgba(59,123,255,.5);
+}
+.odon-note-textarea::placeholder{
+  color: var(--muted);
+}
+.odon-note-actions{
+  display: flex; gap: 8px;
+}
+.odon-note-actions .odon-zoom-btn{
+  flex: 1;
+}
+
+/* ── State warnings ──────────────────────────── */
+.odon-warning-item{
+  padding:6px 10px;
+  border-radius:8px;
+  background: rgba(234,179,8,.12);
+  color:#92400e;
+  font-size:12px;
+  font-weight:600;
+  line-height:1.4;
+  margin-bottom:4px;
+}
+.dark .odon-warning-item{
+  background: rgba(250,204,21,.1);
+  color:#fde047;
+}
+
+/* ── Mobile / Touch UX ───────────────────────── */
+
+/* Zoom popover */
+.odon-zoom-overlay{
+  position:fixed; inset:0; z-index:100;
+  background: rgba(0,0,0,.4);
+  display:flex; align-items:center; justify-content:center;
+  animation: odon-fade-in .15s ease;
+}
+@keyframes odon-fade-in{ from{opacity:0} to{opacity:1} }
+.odon-zoom-popover{
+  background: var(--panel, #fff);
+  border:1px solid var(--line);
+  border-radius:20px;
+  box-shadow: 0 20px 60px rgba(0,0,0,.25);
+  padding:16px;
+  max-width:min(360px, 90vw);
+  width:100%;
+  display:flex; flex-direction:column; align-items:center; gap:12px;
+}
+.odon-zoom-header{
+  width:100%;
+  display:flex; align-items:center; justify-content:space-between;
+}
+.odon-zoom-title{
+  font-weight:800; font-size:16px; color:var(--text);
+}
+.odon-zoom-close{
+  width:32px; height:32px;
+  border:1px solid var(--line);
+  border-radius:999px;
+  background: rgba(0,0,0,.04);
+  color:var(--text);
+  font-size:18px; font-weight:700;
+  cursor:pointer;
+  display:flex; align-items:center; justify-content:center;
+  line-height:1;
+}
+.odon-zoom-close:hover{background: rgba(217,69,69,.12); color:#d94545}
+.odon-zoom-svg{
+  width:200px; height:200px;
+  display:flex; align-items:center; justify-content:center;
+}
+.odon-zoom-svg svg{
+  width:180px; height:180px;
+  pointer-events:none;
+}
+.odon-zoom-actions{
+  display:grid;
+  grid-template-columns: 1fr 1fr;
+  gap:8px;
+  width:100%;
+}
+.odon-zoom-btn{
+  border:1px solid var(--line);
+  background: rgba(59,123,255,.08);
+  color:var(--text);
+  padding:10px 8px;
+  border-radius:12px;
+  font-weight:600;
+  font-size:13px;
+  cursor:pointer;
+  text-align:center;
+}
+.odon-zoom-btn:hover{background: rgba(59,123,255,.18)}
+.odon-zoom-btn.active{
+  background: rgba(18,185,129,.18);
+  border-color: rgba(18,185,129,.5);
+}
+.odon-zoom-btn.danger{
+  background: rgba(217,69,69,.08);
+  border-color: rgba(217,69,69,.3);
+  color:#b83a3a;
+}
+.odon-zoom-btn.danger:hover{background: rgba(217,69,69,.18)}
+
+/* Context menu (long-press) */
+.odon-ctx-menu{
+  position:fixed;
+  z-index:110;
+  background: var(--panel, #fff);
+  border:1px solid var(--line);
+  border-radius:16px;
+  box-shadow: 0 12px 40px rgba(0,0,0,.2);
+  padding:6px;
+  min-width:180px;
+  display:flex; flex-direction:column; gap:4px;
+  animation: odon-ctx-pop .12s ease;
+}
+@keyframes odon-ctx-pop{ from{opacity:0;transform:scale(.95)} to{opacity:1;transform:scale(1)} }
+.odon-ctx-item{
+  border:1px solid var(--line);
+  background: rgba(0,0,0,.02);
+  color:var(--text);
+  padding:10px 14px;
+  border-radius:12px;
+  font-weight:600;
+  font-size:13px;
+  cursor:pointer;
+  text-align:left;
+}
+.odon-ctx-item:hover{background: rgba(59,123,255,.1)}
+.odon-ctx-item.danger{color:#b83a3a}
+.odon-ctx-item.danger:hover{background: rgba(217,69,69,.12)}
+.odon-ctx-divider{height:1px;background:var(--line);margin:2px 0}
+
+/* Dark mode overrides for touch UI */
+.dark .odon-zoom-overlay{background: rgba(0,0,0,.6)}
+.dark .odon-zoom-popover{background: var(--panel); box-shadow: 0 20px 60px rgba(0,0,0,.5)}
+.dark .odon-zoom-close{background: rgba(255,255,255,.06)}
+.dark .odon-zoom-close:hover{background: rgba(248,113,113,.15); color:#f87171}
+.dark .odon-zoom-btn{background: rgba(96,165,250,.1)}
+.dark .odon-zoom-btn:hover{background: rgba(96,165,250,.2)}
+.dark .odon-zoom-btn.active{background: rgba(52,211,153,.18); border-color: rgba(52,211,153,.4)}
+.dark .odon-zoom-btn.danger{background: rgba(248,113,113,.1); border-color: rgba(248,113,113,.25); color:#f87171}
+.dark .odon-ctx-menu{background: var(--panel); box-shadow: 0 12px 40px rgba(0,0,0,.5)}
+.dark .odon-ctx-item{background: rgba(255,255,255,.04)}
+.dark .odon-ctx-item:hover{background: rgba(96,165,250,.12)}
+.dark .odon-ctx-item.danger{color:#f87171}
+
+/* Pinch-to-zoom on grid */
+.odon-tooth-grid.odon-pinch-active{
+  touch-action: none;
+  transform-origin: center center;
+  transition: transform .05s ease;
+}
+
+/* Mobile touch targets & layout */
+@media (pointer: coarse){
+  .odon-tooth-tile{
+    min-height:56px;
+  }
+  .odon-tooth-tile .odon-tooth-svg{
+    height:80px;
+  }
+  .odon-tooth-tile.occl-view .odon-tooth-svg{
+    height:60px;
+  }
+  .odon-tooth-label-cell{
+    min-height:44px;
+    min-width:44px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+  }
+  .odon-chart-actions .odon-btn-icon{
+    min-width:44px;
+    min-height:44px;
+  }
+}
+
+/* Swipe arch toggle bar (mobile only) */
+.odon-arch-toggle{
+  display:none;
+  justify-content:center;
+  gap:8px;
+  padding:8px 10px;
+  border-bottom:1px solid var(--line);
+}
+.odon-arch-toggle .odon-arch-btn{
+  border:1px solid var(--line);
+  background: rgba(0,0,0,.04);
+  color:var(--text);
+  padding:8px 20px;
+  border-radius:12px;
+  font-weight:700;
+  font-size:13px;
+  cursor:pointer;
+  flex:1;
+  text-align:center;
+}
+.odon-arch-toggle .odon-arch-btn.active{
+  background: rgba(59,123,255,.18);
+  border-color: rgba(59,123,255,.45);
+}
+.dark .odon-arch-toggle .odon-arch-btn{background: rgba(255,255,255,.06)}
+.dark .odon-arch-toggle .odon-arch-btn.active{background: rgba(96,165,250,.2); border-color: rgba(96,165,250,.45)}
+@media (max-width: 600px){
+  .odon-arch-toggle{display:flex}
+  .odon-tooth-grid.odon-arch-upper .lower-row,
+  .odon-tooth-grid.odon-arch-upper .lower-row + .odon-tooth-label-row{display:none !important}
+  .odon-tooth-grid.odon-arch-lower .upper-row,
+  .odon-tooth-grid.odon-arch-lower .odon-tooth-label-row:first-child{display:none !important}
+}
+/* Print styles */
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  .odontogram-root, .odontogram-root * {
+    visibility: visible;
+  }
+  .odontogram-root {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    box-shadow: none !important;
+    border: none !important;
+    background: #fff !important;
+  }
+  .odon-panel, 
+  .odon-chart-actions, 
+  .odon-pill, 
+  .odon-chart-hint,
+  .odon-btn,
+  .odon-select,
+  .odon-check-label input,
+  .odon-topbar {
+    display: none !important;
+  }
+  .odon-chart {
+    width: 100% !important;
+  }
+  .odon-card {
+    border: 1px solid #eee !important;
+    break-inside: avoid;
+  }
+  .odon-tooth-tile {
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+  }
+}

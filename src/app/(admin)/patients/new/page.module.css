@@ -1,0 +1,352 @@
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.backLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  color: var(--text-muted);
+  font-weight: 700;
+  margin-bottom: 0.95rem;
+}
+
+.sectionCard {
+  padding: 1.35rem;
+  border-radius: 24px;
+  border: 1px solid var(--border);
+  background: rgba(255, 255, 255, 0.94);
+  box-shadow: var(--shadow-sm);
+}
+
+.sectionHeader {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  align-items: flex-start;
+  margin-bottom: 1rem;
+}
+
+.sectionTitle {
+  font-size: 1.18rem;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+}
+
+.sectionCopy {
+  margin-top: 0.35rem;
+  color: var(--text-muted);
+  font-size: 0.92rem;
+  line-height: 1.6;
+}
+
+.identityGrid {
+  display: grid;
+  grid-template-columns: 320px minmax(0, 1fr);
+  gap: 1.2rem;
+}
+
+.uploadColumn {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+.hiddenInput {
+  display: none;
+}
+
+.uploadDropzone {
+  min-height: 470px;
+  border-radius: 22px;
+  border: 1px dashed color-mix(in srgb, var(--primary) 35%, var(--border));
+  background:
+    linear-gradient(180deg, rgba(248, 250, 252, 0.94), rgba(241, 245, 249, 0.92));
+  padding: 1rem;
+  cursor: pointer;
+  transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+  overflow: hidden;
+}
+
+.uploadDropzone:hover,
+.uploadDropzoneActive {
+  transform: translateY(-1px);
+  border-color: color-mix(in srgb, var(--primary) 55%, white);
+  box-shadow: var(--shadow-sm);
+}
+
+.uploadPlaceholder {
+  height: 100%;
+  min-height: 438px;
+  border-radius: 18px;
+  border: 1px dashed rgba(148, 163, 184, 0.5);
+  display: grid;
+  place-items: center;
+  text-align: center;
+  padding: 1.4rem;
+}
+
+.uploadIcon {
+  width: 56px;
+  height: 56px;
+  margin: 0 auto 1rem;
+  border-radius: 999px;
+  display: grid;
+  place-items: center;
+  background: var(--primary-soft);
+  color: var(--primary);
+  font-size: 1.8rem;
+  font-weight: 700;
+}
+
+.uploadText {
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+.uploadHint {
+  margin-top: 0.45rem;
+  color: var(--text-muted);
+  line-height: 1.5;
+}
+
+.uploadPreview {
+  width: 100%;
+  height: 100%;
+  min-height: 438px;
+  object-fit: cover;
+  border-radius: 18px;
+}
+
+.uploadMeta {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.fileBadge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.75rem 0.9rem;
+  border-radius: 16px;
+  background: var(--card-muted);
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  font-size: 0.88rem;
+}
+
+.uploadActions {
+  display: flex;
+  gap: 0.65rem;
+  flex-wrap: wrap;
+}
+
+.clearButton {
+  border: 1px solid rgba(239, 68, 68, 0.2);
+  background: rgba(254, 242, 242, 0.9);
+  color: #dc2626;
+  padding: 0.75rem 1rem;
+  border-radius: 999px;
+  cursor: pointer;
+  font-weight: 700;
+}
+
+.fieldsColumn {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.fieldGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.95rem;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+.fieldLabel {
+  font-size: 0.82rem;
+  color: var(--text-soft);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-weight: 800;
+}
+
+.inlineRow {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) minmax(0, 1fr);
+  gap: 0.95rem;
+  align-items: end;
+}
+
+.checkboxLabel {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.65rem;
+  padding: 0.95rem 1rem;
+  min-height: 54px;
+  border-radius: 16px;
+  border: 1px solid var(--border);
+  background: var(--card-muted);
+  font-weight: 700;
+}
+
+.inlineCountryField {
+  min-width: 0;
+}
+
+.questionGrid {
+  display: flex;
+  flex-direction: column;
+}
+
+.questionRow {
+  display: grid;
+  grid-template-columns: minmax(220px, 300px) minmax(0, 1fr);
+  gap: 1rem;
+  align-items: start;
+  padding: 1rem 0;
+  border-top: 1px solid var(--border);
+}
+
+.questionRow:first-child {
+  padding-top: 0;
+  border-top: none;
+}
+
+.questionLabel {
+  font-weight: 700;
+  line-height: 1.6;
+}
+
+.textarea {
+  resize: vertical;
+  min-height: 96px;
+}
+
+.textareaLarge {
+  resize: vertical;
+}
+
+.medicalGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.95rem 1.3rem;
+}
+
+.medicalRow {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  align-items: center;
+  padding: 1rem 0;
+  border-top: 1px solid var(--border);
+}
+
+.medicalRow:nth-child(-n + 2) {
+  border-top: none;
+  padding-top: 0;
+}
+
+.medicalLabel {
+  font-weight: 700;
+  line-height: 1.5;
+}
+
+.binaryOptions {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.85rem;
+}
+
+.radioOption {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-weight: 700;
+  color: var(--text-muted);
+}
+
+.footerBar {
+  position: sticky;
+  bottom: 1rem;
+  z-index: 10;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem 1.15rem;
+  border-radius: 22px;
+  border: 1px solid var(--border);
+  background: rgba(255, 255, 255, 0.94);
+  box-shadow: var(--shadow-md);
+}
+
+.footerMeta {
+  min-width: 0;
+}
+
+.footerTitle {
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+.footerCopy {
+  margin-top: 0.25rem;
+  color: var(--text-muted);
+  font-size: 0.9rem;
+}
+
+.errorBanner {
+  padding: 1rem 1.1rem;
+  border-radius: 18px;
+  border: 1px solid rgba(239, 68, 68, 0.22);
+  background: rgba(254, 242, 242, 0.94);
+  color: #b91c1c;
+  font-weight: 700;
+}
+
+@media (max-width: 1120px) {
+  .identityGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .uploadDropzone,
+  .uploadPreview,
+  .uploadPlaceholder {
+    min-height: 320px;
+  }
+}
+
+@media (max-width: 860px) {
+  .fieldGrid,
+  .medicalGrid,
+  .inlineRow,
+  .questionRow {
+    grid-template-columns: 1fr;
+  }
+
+  .medicalRow {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+
+@media (max-width: 640px) {
+  .sectionCard {
+    padding: 1rem;
+  }
+
+  .footerBar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}
