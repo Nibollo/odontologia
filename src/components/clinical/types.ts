@@ -109,6 +109,10 @@ export interface OdontogramToothSnapshot {
   crownMaterial: OdontogramCrownMaterial;
   customStates: Record<string, unknown>;
   note: string;
+  /** Simplified per-tooth periodontal chart (probing depth / attachment loss, in mm). */
+  periodontal: { probingDepth?: number; attachmentLoss?: number } | null;
+  /** Free-text notes keyed by finding id (e.g. "caries:11:caries-mesial"). */
+  findingNotes: Record<string, string>;
 }
 
 export interface OdontogramSnapshot {
@@ -132,6 +136,7 @@ export interface OdontogramSummary {
   endoTeeth: number;
   mobilityTeeth: number;
   noteTeeth: number;
+  periodontalTeeth: number;
 }
 
 export interface MatrixRowDefinition {

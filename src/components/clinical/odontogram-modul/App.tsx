@@ -1,10 +1,11 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import "./odontogram.css";
-import { 
-  initOdontogram, 
-  destroyOdontogram, 
+import { applyThemeConfig, type OdontogramThemeConfig } from "./theme";
+import {
+  initOdontogram,
+  destroyOdontogram,
   getFullStatus,
-  hydrateState,
+  setFullStatus,
   setNumberingSystem,
   setReadOnly,
   setNotesEnabled,
@@ -14,6 +15,7 @@ import {
   setWisdomVisible,
   setShowBase,
   setHealthyPulpVisible,
+  setPrimaryDentitionVisible,
   type NumberingSystem,
   type OdontogramPlugin
 } from "./odontogram";
@@ -37,6 +39,7 @@ interface AppProps {
   plugins?: OdontogramPlugin[];
   readOnly?: boolean;
   enableNotes?: boolean;
+  themeConfig?: OdontogramThemeConfig;
 }
 
 export default function App({
@@ -46,15 +49,18 @@ export default function App({
   plugins,
   readOnly: readOnlyProp,
   enableNotes,
+  themeConfig,
 }: AppProps) {
   const { t } = useI18n({ language, onLanguageChange });
   const currentNumbering = numberingSystem ?? "FDI";
+  const rootRef = useRef<HTMLDivElement>(null);
 
   // Toggle visibility state (mirrors engine globals)
   const [occlusal, setOcclusal] = useState(true);
   const [wisdom, setWisdom] = useState(true);
   const [bone, setBone] = useState(true);
   const [pulp, setPulp] = useState(true);
+  const [primaryDentition, setPrimaryDentition] = useState(false);
 
   useEffect(() => {
     initOdontogram();
@@ -78,6 +84,10 @@ export default function App({
   useEffect(() => {
     setNotesEnabled(enableNotes ?? false);
   }, [enableNotes]);
+
+  useEffect(() => {
+    applyThemeConfig(rootRef.current, themeConfig);
+  }, [themeConfig]);
 
   function handleToggleOcclusal() {
     const next = !occlusal;
@@ -103,8 +113,14 @@ export default function App({
     setHealthyPulpVisible(next);
   }
 
+  function handleTogglePrimaryDentition() {
+    const next = !primaryDentition;
+    setPrimaryDentition(next);
+    setPrimaryDentitionVisible(next);
+  }
+
   return (
-    <div className="odontogram-root">
+    <div className="odontogram-root" ref={rootRef}>
       <main className="odon-layout">
         <aside className="odon-panel odon-panel-top">
           <div className="odon-panel-header">
@@ -244,6 +260,14 @@ export default function App({
                 <span>{t("mobility.title")}</span>
                 <select id="mobilitySelect" className="odon-select"></select>
               </div>
+              <div className="odon-row odon-mt-2">
+                <span>{t("periodontal.probingDepth")}</span>
+                <input id="periodontalProbingDepth" type="number" min={0} max={15} step={1} className="odon-select" placeholder="mm" />
+              </div>
+              <div className="odon-row odon-mt-2">
+                <span>{t("periodontal.attachmentLoss")}</span>
+                <input id="periodontalAttachmentLoss" type="number" min={0} max={15} step={1} className="odon-select" placeholder="mm" />
+              </div>
             </section>
 
             {/* Hidden Required IDs for compatibility */}
@@ -340,6 +364,16 @@ export default function App({
                 <span className="odon-btn-label">{t("chart.actions.pulp")}</span>
               </button>
               <button
+                id="btnPrimaryDentitionView"
+                className="odon-btn odon-btn-toggle"
+                aria-pressed={primaryDentition}
+                aria-label={t("chart.actions.primaryDentition")}
+                title={t("chart.actions.primaryDentition")}
+                onClick={handleTogglePrimaryDentition}
+              >
+                <span className="odon-btn-label">{t("chart.actions.primaryDentition")}</span>
+              </button>
+              <button
                 id="btnSelectNoneChart"
                 className="odon-btn odon-btn-ghost odon-btn-icon"
                 aria-label={t("chart.actions.clearSelection")}
@@ -370,4 +404,4 @@ export default function App({
   );
 }
 
-export { getFullStatus, hydrateState as setFullStatus, setChangeCallback };
+export { getFullStatus, setFullStatus, setChangeCallback };

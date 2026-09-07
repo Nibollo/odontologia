@@ -27,3 +27,6 @@ next-env.d.ts
 
 # scratch
 /scratch
+
+# local Claude Code session state
+/.claude

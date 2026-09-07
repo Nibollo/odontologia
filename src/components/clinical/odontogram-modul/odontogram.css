@@ -12,14 +12,14 @@
 /* When themeConfig is applied via JS, --odon-* properties are set on .odontogram-root.
    Re-resolve the shorthand variables so children pick up the overrides. */
 .odontogram-root{
-  --bg: #f4f7fb;
-  --panel: #ffffff;
-  --card: #ffffff;
-  --muted: #6b7280;
-  --text: #182230;
-  --line: #dbe4ee;
-  --accent: #0f766e;
-  --accent2: #22c55e;
+  --bg: var(--odon-bg, #f4f7fb);
+  --panel: var(--odon-panel, #ffffff);
+  --card: var(--odon-card, #ffffff);
+  --muted: var(--odon-muted, #6b7280);
+  --text: var(--odon-text, #182230);
+  --line: var(--odon-line, #dbe4ee);
+  --accent: var(--odon-accent, #0f766e);
+  --accent2: var(--odon-accent2, #22c55e);
   color: var(--text);
 }
 .dark .odontogram-root{
@@ -480,6 +480,19 @@ select:focus{
   background: rgba(18,185,129,.18);
   border-color: rgba(18,185,129,.5);
 }
+.odon-finding-note-btn{
+  margin-left: auto;
+  border: none;
+  background: transparent;
+  padding: 2px 4px;
+  border-radius: 8px;
+  font-size: 12px;
+  line-height: 1;
+  opacity: .45;
+  cursor: pointer;
+}
+.odon-finding-note-btn:hover{ opacity: .85; background: rgba(0,0,0,.06); }
+.odon-finding-note-btn-active{ opacity: 1; }
 .odon-row input[type="checkbox"]{display:none}
 .odon-row:has(input[type="checkbox"]){
   border-radius:12px;
@@ -945,6 +958,17 @@ select:focus{
   }
 }
 
+/* Primary (deciduous) dentition row — hidden unless #toothGrid carries
+   .odon-show-primary. Hidden as a whole 16-cell-wide row (real teeth +
+   placeholder cells together) so the implicit grid flow of the rows below
+   it is unaffected either way. */
+.odon-tooth-tile.odon-primary-tile{
+  border-style:dashed;
+}
+.odon-tooth-grid:not(.odon-show-primary) .odon-primary-tile{
+  display:none;
+}
+
 /* Swipe arch toggle bar (mobile only) */
 .odon-arch-toggle{
   display:none;
@@ -978,18 +1002,11 @@ select:focus{
   .odon-tooth-grid.odon-arch-lower .upper-row,
   .odon-tooth-grid.odon-arch-lower .odon-tooth-label-row:first-child{display:none !important}
 }
-/* Print styles */
+/* Print styles. Global page visibility (which elements print at all) is owned
+   by the host page's print media query (see page.module.css's .printArea) —
+   this block only prunes/resets the odontogram's own chrome once it is visible. */
 @media print {
-  body * {
-    visibility: hidden;
-  }
-  .odontogram-root, .odontogram-root * {
-    visibility: visible;
-  }
   .odontogram-root {
-    position: absolute;
-    left: 0;
-    top: 0;
     width: 100%;
     margin: 0;
     padding: 0;
@@ -997,7 +1014,7 @@ select:focus{
     border: none !important;
     background: #fff !important;
   }
-  .odon-panel, 
+  .odon-panel,
   .odon-chart-actions, 
   .odon-pill, 
   .odon-chart-hint,

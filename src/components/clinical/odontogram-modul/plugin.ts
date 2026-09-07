@@ -59,13 +59,15 @@ export type OdontogramPlugin = {
 };
 
 /**
- * Get the quadrant number (1–4) for a given FDI tooth number.
+ * Get the quadrant number (1–4) for a given FDI tooth number. Primary
+ * (deciduous) teeth use FDI quadrants 5–8, which map onto the same four
+ * physical quadrants as their permanent counterparts (5→1, 6→2, 7→3, 8→4).
  */
 export function getQuadrant(toothNo: number): 1 | 2 | 3 | 4 {
   const first = Math.floor(toothNo / 10);
-  if (first === 1) return 1;
-  if (first === 2) return 2;
-  if (first === 3) return 3;
+  if (first === 1 || first === 5) return 1;
+  if (first === 2 || first === 6) return 2;
+  if (first === 3 || first === 7) return 3;
   return 4;
 }
 

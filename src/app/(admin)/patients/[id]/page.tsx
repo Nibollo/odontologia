@@ -8,6 +8,7 @@ import {
   buildDetailedTreatmentPlan_V2,
   extractClinicalFindingsFromSnapshot,
   formatRelativeSummary,
+  mergeHistoryTimeline,
   normalizeOdontogramSnapshot,
   summarizeOdontogramSnapshot,
 } from '@/components/clinical/odontogramState';
@@ -227,6 +228,11 @@ export default function PatientProfile({ params }: { params: Promise<{ id: strin
     return buildDetailedTreatmentPlan_V2(derivedFindings);
   }, [derivedFindings]);
 
+  const historyTimeline = useMemo(() => {
+    if (!patient) return [];
+    return mergeHistoryTimeline(patient.odontogramEntries, patient.clinicalEpisodes);
+  }, [patient]);
+
   const latestEpisode = patient?.clinicalEpisodes?.[0] ?? null;
   const persistedActiveFindings = useMemo(() => latestEpisode?.findings ?? [], [latestEpisode]);
   const persistedTreatmentItems = useMemo(() => patient?.treatmentItems ?? [], [patient?.treatmentItems]);
@@ -443,7 +449,7 @@ export default function PatientProfile({ params }: { params: Promise<{ id: strin
         ))}
       </div>
 
-      <section className={styles.profileGrid}>
+      <section className={`${styles.profileGrid} ${styles.printArea}`}>
         <article className={styles.infoCard}>
           <div className={styles.sectionHeader}>
             <div>
@@ -486,7 +492,7 @@ export default function PatientProfile({ params }: { params: Promise<{ id: strin
       </section>
 
       {activeTab === 'Ficha clínica' && (
-        <section className={styles.contentGrid}>
+        <section className={`${styles.contentGrid} ${styles.printArea}`}>
             <article className={styles.content}>
               <div className={styles.sectionHeader}>
                 <div>
@@ -561,8 +567,7 @@ export default function PatientProfile({ params }: { params: Promise<{ id: strin
 
               <div className={styles.sideCard}>
                 <div className={styles.sectionTitle}>Historial clínico</div>
-                <div className={styles.sectionCopy}>Puedes revisar versiones previas del odontograma y los episodios clínicos guardados.</div>
-                <div className={styles.historySectionLabel}>Versiones del odontograma</div>
+                <div className={styles.sectionCopy}>Cada guardado del odontograma queda como una entrada de este historial, lista para revisar.</div>
                 <div className={styles.historyList}>
                   <button
                     className={`${styles.historyItem} ${selectedRevisionId === 'current' ? styles.historyItemActive : ''}`}
@@ -572,36 +577,28 @@ export default function PatientProfile({ params }: { params: Promise<{ id: strin
                     <span className={styles.historyMeta}>{isDirty ? 'Con cambios pendientes' : 'Lista para consulta'}</span>
                   </button>
 
-                  {patient.odontogramEntries.map((entry) => (
-                    <button
-                      key={entry.id}
-                      className={`${styles.historyItem} ${selectedRevisionId === entry.id ? styles.historyItemActive : ''}`}
-                      onClick={() => setSelectedRevisionId(entry.id)}
-                    >
-                      <span className={styles.historyTitle}>{entry.label || 'Revisión clínica'}</span>
-                      <span className={styles.historyMeta}>
-                        {formatDateTime(entry.createdAt)}
-                        {entry.dentist?.name ? ` · ${entry.dentist.name}` : ''}
-                      </span>
-                    </button>
-                  ))}
-                </div>
-
-                <div className={styles.historySectionLabel}>Episodios clínicos</div>
-                <div className={styles.historyList}>
-                  {patient.clinicalEpisodes.length === 0 ? (
-                    <div className={styles.emptyMedical}>Todavia no hay episodios guardados.</div>
+                  {historyTimeline.length === 0 ? (
+                    <div className={styles.emptyMedical}>Todavía no hay revisiones guardadas.</div>
                   ) : (
-                    patient.clinicalEpisodes.map((episode) => (
-                      <article key={episode.id} className={styles.historyStaticItem}>
-                        <span className={styles.historyTitle}>{episode.title || 'Consulta clinica'}</span>
-                        <span className={styles.historyMeta}>
-                          {formatDateTime(episode.createdAt)}
-                          {episode.dentist?.name ? ` · ${episode.dentist.name}` : ''}
-                        </span>
-                        {episode.note ? <p className={styles.timelineNotes}>{episode.note}</p> : null}
-                      </article>
-                    ))
+                    historyTimeline.map((item) =>
+                      item.selectable ? (
+                        <button
+                          key={item.id}
+                          className={`${styles.historyItem} ${selectedRevisionId === item.id ? styles.historyItemActive : ''}`}
+                          onClick={() => setSelectedRevisionId(item.id)}
+                        >
+                          <span className={styles.historyTitle}>{item.title}</span>
+                          <span className={styles.historyMeta}>{item.meta}</span>
+                          {item.note ? <p className={styles.timelineNotes}>{item.note}</p> : null}
+                        </button>
+                      ) : (
+                        <article key={item.id} className={styles.historyStaticItem}>
+                          <span className={styles.historyTitle}>{item.title}</span>
+                          <span className={styles.historyMeta}>{item.meta}</span>
+                          {item.note ? <p className={styles.timelineNotes}>{item.note}</p> : null}
+                        </article>
+                      ),
+                    )
                   )}
                 </div>
               </div>
@@ -610,7 +607,7 @@ export default function PatientProfile({ params }: { params: Promise<{ id: strin
       )}
 
       {activeTab === 'Plan de tratamiento' && (
-        <section className={styles.content}>
+        <section className={`${styles.content} ${styles.printArea}`}>
           <div className={styles.planContainer}>
             <aside className={styles.planSidebar}>
               <div className={styles.sideCard}>
@@ -712,7 +709,7 @@ export default function PatientProfile({ params }: { params: Promise<{ id: strin
       )}
 
       {activeTab === 'Citas' && (
-        <section className={styles.content}>
+        <section className={`${styles.content} ${styles.printArea}`}>
           <div className={styles.sectionHeader}>
             <div>
               <div className={styles.sectionTitle}>Agenda y continuidad</div>
@@ -745,7 +742,7 @@ export default function PatientProfile({ params }: { params: Promise<{ id: strin
       )}
 
       {activeTab === 'Presupuesto' && (
-        <section className={styles.content}>
+        <section className={`${styles.content} ${styles.printArea}`}>
           <div className={styles.sectionHeader}>
             <div>
               <div className={styles.sectionTitle}>Dashboard Financiero</div>

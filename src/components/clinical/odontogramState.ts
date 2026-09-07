@@ -22,6 +22,9 @@ const ALL_TEETH = [
   21, 22, 23, 24, 25, 26, 27, 28,
   48, 47, 46, 45, 44, 43, 42, 41,
   31, 32, 33, 34, 35, 36, 37, 38,
+  // Primary (deciduous) dentition, FDI 51-85.
+  55, 54, 53, 52, 51, 61, 62, 63, 64, 65,
+  85, 84, 83, 82, 81, 71, 72, 73, 74, 75,
 ] as const;
 
 const SURFACE_CODE_MAP: Record<string, ToothSurface> = {
@@ -99,6 +102,8 @@ export function createEmptyOdontogramTooth(): OdontogramToothSnapshot {
     crownMaterial: 'natural',
     customStates: {},
     note: '',
+    periodontal: null,
+    findingNotes: {},
   };
 }
 
@@ -141,6 +146,9 @@ export function normalizeOdontogramSnapshot(
       customStates:
         rawTooth?.customStates && typeof rawTooth.customStates === 'object' ? rawTooth.customStates : {},
       note: typeof rawTooth?.note === 'string' ? rawTooth.note : '',
+      periodontal: rawTooth?.periodontal && typeof rawTooth.periodontal === 'object' ? rawTooth.periodontal : null,
+      findingNotes:
+        rawTooth?.findingNotes && typeof rawTooth.findingNotes === 'object' ? rawTooth.findingNotes : {},
     };
     return accumulator;
   }, {});
@@ -248,6 +256,7 @@ export function summarizeOdontogramSnapshot(snapshot: OdontogramSnapshot): Odont
     endoTeeth: teeth.filter((tooth) => tooth.endo !== 'none').length,
     mobilityTeeth: teeth.filter((tooth) => tooth.mobility !== 'none').length,
     noteTeeth: teeth.filter((tooth) => (tooth.note || '').trim().length > 0).length,
+    periodontalTeeth: teeth.filter((tooth) => Boolean(tooth.periodontal)).length,
   };
 }
 
@@ -271,7 +280,9 @@ export function hasMeaningfulChanges(tooth: OdontogramToothSnapshot): boolean {
     tooth.bridgePillar ||
     tooth.bridgeUnit !== 'none' ||
     tooth.crownMaterial !== 'natural' ||
-    (tooth.note || '').trim().length > 0
+    (tooth.note || '').trim().length > 0 ||
+    Boolean(tooth.periodontal) ||
+    Object.keys(tooth.findingNotes || {}).length > 0
   );
 }
 
@@ -433,6 +444,28 @@ export function extractClinicalFindingsFromSnapshot(snapshot: OdontogramSnapshot
       });
     }
 
+    if (tooth.periodontal) {
+      const { probingDepth, attachmentLoss } = tooth.periodontal;
+      findings.push({
+        id: createDraftFindingId(['periodontal-chart', toothNumber]),
+        toothNumber,
+        surfaceCode: null,
+        scope: 'TOOTH',
+        code: 'periodontal-chart',
+        label: [
+          probingDepth != null ? `Sondaje ${probingDepth}mm` : null,
+          attachmentLoss != null ? `Pérdida de inserción ${attachmentLoss}mm` : null,
+        ].filter(Boolean).join(' · ') || 'Periodontograma',
+        category: 'periodontal',
+        status: 'ACTIVE',
+        payload: {
+          probingDepth,
+          attachmentLoss,
+        },
+        notedAt,
+      });
+    }
+
     if ((tooth.note || '').trim()) {
       findings.push({
         id: createDraftFindingId(['note', toothNumber]),
@@ -448,6 +481,15 @@ export function extractClinicalFindingsFromSnapshot(snapshot: OdontogramSnapshot
         },
         notedAt,
       });
+    }
+  }
+
+  // Attach per-finding free-text notes (keyed by finding id) to their payload.
+  for (const finding of findings) {
+    const tooth = snapshot.teeth[Number(finding.toothNumber)];
+    const findingNote = tooth?.findingNotes?.[finding.id];
+    if (findingNote) {
+      finding.payload = { ...(finding.payload || {}), note: findingNote };
     }
   }
 
@@ -547,6 +589,106 @@ export function buildDetailedTreatmentPlan_V2(findings: ClinicalFindingDto[]): T
   };
 
   return items.sort((a, b) => (statusWeight[a.status] ?? 5) - (statusWeight[b.status] ?? 5));
+}
+
+export interface OdontogramEntryLike {
+  id: string;
+  label?: string | null;
+  note?: string | null;
+  createdAt: string;
+  dentist?: { name: string } | null;
+}
+
+export interface ClinicalEpisodeLike {
+  id: string;
+  title?: string | null;
+  note?: string | null;
+  createdAt: string;
+  dentist?: { name: string } | null;
+}
+
+export interface MergedHistoryItem {
+  /** Stable key for React lists and, when selectable, for `selectedRevisionId`. */
+  id: string;
+  /** True when this item corresponds to a real OdontogramEntry snapshot that can be previewed. */
+  selectable: boolean;
+  title: string;
+  meta: string;
+  note: string | null;
+  createdAt: string;
+}
+
+/**
+ * A PUT to /api/patients/[id]/odontogram always creates one OdontogramEntry
+ * (the previewable snapshot) and one ClinicalEpisode (richer title/findings)
+ * together, in the same transaction, but with no FK between them. This pairs
+ * them heuristically by closest createdAt (+ same dentist, when known) so the
+ * UI can render a single combined timeline instead of two parallel lists.
+ * Anything that doesn't find a match (legacy data, clock skew) is still shown,
+ * just on its own.
+ */
+export function mergeHistoryTimeline(
+  entries: OdontogramEntryLike[],
+  episodes: ClinicalEpisodeLike[],
+): MergedHistoryItem[] {
+  const PAIR_WINDOW_MS = 5000;
+  const usedEpisodeIds = new Set<string>();
+  const items: MergedHistoryItem[] = [];
+
+  for (const entry of entries) {
+    const entryTime = new Date(entry.createdAt).getTime();
+    let bestEpisode: ClinicalEpisodeLike | null = null;
+    let bestDiff = Infinity;
+
+    for (const episode of episodes) {
+      if (usedEpisodeIds.has(episode.id)) continue;
+      const diff = Math.abs(new Date(episode.createdAt).getTime() - entryTime);
+      const sameDentist = (entry.dentist?.name ?? null) === (episode.dentist?.name ?? null);
+      if (diff <= PAIR_WINDOW_MS && sameDentist && diff < bestDiff) {
+        bestEpisode = episode;
+        bestDiff = diff;
+      }
+    }
+    if (bestEpisode) usedEpisodeIds.add(bestEpisode.id);
+
+    const dentistName = entry.dentist?.name ?? bestEpisode?.dentist?.name ?? null;
+    items.push({
+      id: entry.id,
+      selectable: true,
+      title: bestEpisode?.title || entry.label || 'Revisión clínica',
+      meta: `${formatHistoryDateTime(entry.createdAt)}${dentistName ? ` · ${dentistName}` : ''}`,
+      note: bestEpisode?.note || entry.note || null,
+      createdAt: entry.createdAt,
+    });
+  }
+
+  for (const episode of episodes) {
+    if (usedEpisodeIds.has(episode.id)) continue;
+    items.push({
+      id: episode.id,
+      selectable: false,
+      title: episode.title || 'Consulta clínica',
+      meta: `${formatHistoryDateTime(episode.createdAt)}${episode.dentist?.name ? ` · ${episode.dentist.name}` : ''}`,
+      note: episode.note || null,
+      createdAt: episode.createdAt,
+    });
+  }
+
+  return items.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+}
+
+function formatHistoryDateTime(iso: string): string {
+  try {
+    return new Date(iso).toLocaleString('es-ES', {
+      day: '2-digit',
+      month: 'short',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+    });
+  } catch {
+    return iso;
+  }
 }
 
 export function summarizeClinicalEpisode(

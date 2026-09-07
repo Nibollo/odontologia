@@ -1006,3 +1006,24 @@
     grid-template-columns: 1fr;
   }
 }
+
+@media print {
+  body * {
+    visibility: hidden;
+  }
+
+  .printArea,
+  .printArea * {
+    visibility: visible;
+  }
+
+  .printArea {
+    position: static;
+  }
+
+  .tabs,
+  .footerBar,
+  .heroActions {
+    display: none !important;
+  }
+}

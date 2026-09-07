@@ -61,12 +61,35 @@ const TOOTH_TEMPLATE = new Map([
   [26,{tpl:16,rot:0,mirror:true}],[27,{tpl:16,rot:0,mirror:true}],[28,{tpl:16,rot:0,mirror:true}],
   [36,{tpl:16,rot:180,mirror:false}],[37,{tpl:16,rot:180,mirror:false}],[38,{tpl:16,rot:180,mirror:false}],
   [46,{tpl:16,rot:180,mirror:true}],[47,{tpl:16,rot:180,mirror:true}],[48,{tpl:16,rot:180,mirror:true}],
+
+  // Primary (deciduous) dentition, FDI 51-85. Reuses the same 4 templates as
+  // the permanent teeth: incisors -> 11, canines -> 13, molars -> 14 (the
+  // permanent premolar template doubles as a smaller molar shape here since
+  // there is no dedicated primary-molar artwork).
+  [51,{tpl:11,rot:0,mirror:false}], [52,{tpl:11,rot:0,mirror:false}],
+  [61,{tpl:11,rot:0,mirror:true}], [62,{tpl:11,rot:0,mirror:true}],
+  [71,{tpl:11,rot:180,mirror:false}], [72,{tpl:11,rot:180,mirror:false}],
+  [81,{tpl:11,rot:180,mirror:true}], [82,{tpl:11,rot:180,mirror:true}],
+  [53,{tpl:13,rot:0,mirror:false}],
+  [63,{tpl:13,rot:0,mirror:true}],
+  [73,{tpl:13,rot:180,mirror:false}],
+  [83,{tpl:13,rot:180,mirror:true}],
+  [54,{tpl:14,rot:0,mirror:false}],[55,{tpl:14,rot:0,mirror:false}],
+  [64,{tpl:14,rot:0,mirror:true}],[65,{tpl:14,rot:0,mirror:true}],
+  [74,{tpl:14,rot:180,mirror:false}],[75,{tpl:14,rot:180,mirror:false}],
+  [84,{tpl:14,rot:180,mirror:true}],[85,{tpl:14,rot:180,mirror:true}],
 ]);
 
-const ALL_TEETH = [
+const PERMANENT_TEETH = [
   18,17,16,15,14,13,12,11,21,22,23,24,25,26,27,28,
   48,47,46,45,44,43,42,41,31,32,33,34,35,36,37,38
 ];
+
+const PRIMARY_TEETH_UPPER = [55,54,53,52,51,61,62,63,64,65];
+const PRIMARY_TEETH_LOWER = [85,84,83,82,81,71,72,73,74,75];
+const PRIMARY_TEETH = [...PRIMARY_TEETH_UPPER, ...PRIMARY_TEETH_LOWER];
+
+const ALL_TEETH = [...PERMANENT_TEETH, ...PRIMARY_TEETH];
 
 const GROUPS = {
   variants: [
@@ -157,6 +180,11 @@ function defaultState(){
     crownMaterial: "natural",   // natural | broken | emax | zircon | metal | temporary | telescope
     customStates: {} as Record<string, unknown>,
     note: "",
+    // Simplified per-tooth periodontal chart (probing depth / attachment loss, in mm).
+    periodontal: null as { probingDepth?: number; attachmentLoss?: number } | null,
+    // Free-text notes keyed by finding id (e.g. "caries:11:caries-mesial"), so a
+    // note can be attached to one specific finding instead of only the tooth as a whole.
+    findingNotes: {} as Record<string, string>,
   };
 }
 
@@ -277,6 +305,7 @@ let wisdomVisible = true;
 let showBase = true;
 let occlusalVisible = true;
 let showHealthyPulp = true;
+let primaryDentitionVisible = false;
 let suppressEdentulousSync = false;
 let numberingSystem: NumberingSystem = "FDI";
 let readOnly = false;
@@ -322,7 +351,7 @@ function buildRadios(container: Any, name: Any, options: Any, onChange: Any){
   }
 }
 
-function buildChecks(container: Any, items: Any, onToggle: Any){
+function buildChecks(container: Any, items: Any, onToggle: Any, findingKeyPrefix: Any = null){
   if(!container) return;
   container.innerHTML = "";
   for(const it of items){
@@ -337,6 +366,21 @@ function buildChecks(container: Any, items: Any, onToggle: Any){
     input.addEventListener("change", (e)=>onToggle(it.value, (e.target as HTMLInputElement).checked));
     if(container.id === "cariesChecks" && it.value === "caries-subcrown"){
       setDisabled(input, true);
+    }
+    if(findingKeyPrefix){
+      const noteBtn = el("button", {
+        type: "button",
+        class: "odon-finding-note-btn",
+        title: t("note.title"),
+        "aria-label": t("note.title"),
+        text: "📝",
+      });
+      noteBtn.addEventListener("click", (e: Any) => {
+        e.preventDefault();
+        e.stopPropagation();
+        showFindingNoteEditor(findingKeyPrefix, it.value, noteBtn);
+      });
+      label.appendChild(noteBtn);
     }
     container.appendChild(label);
   }
@@ -1132,7 +1176,7 @@ function updateToothLabelNoteIcon(toothNo: number){
   for(const labelMap of [toothLabelUpper, toothLabelLower]){
     const cell = labelMap.get(toothNo);
     if(!cell) continue;
-    let icon = cell.querySelector$(".odon-tooth-note-icon") as HTMLElement | null;
+    let icon = cell.querySelector(".odon-tooth-note-icon") as HTMLElement | null;
     if(hasNote){
       if(!icon){
         icon = el("span", { class: "odon-tooth-note-icon", "aria-hidden": "true", text: "\u{1F4DD}" });
@@ -1292,11 +1336,24 @@ function syncControlsFromState(state: Any){
     }
   }
 
+  const probingDepthInput = $("#periodontalProbingDepth") as HTMLInputElement | null;
+  if(probingDepthInput) probingDepthInput.value = state.periodontal?.probingDepth?.toString() ?? "";
+  const attachmentLossInput = $("#periodontalAttachmentLoss") as HTMLInputElement | null;
+  if(attachmentLossInput) attachmentLossInput.value = state.periodontal?.attachmentLoss?.toString() ?? "";
+
   // mods
   $$("#modsChecks input[type=checkbox]").forEach(c => c.checked = state.mods.has(c.value));
+  $$("#modsChecks .odon-finding-note-btn").forEach((btn: Any) => {
+    const value = btn.closest("label")?.querySelector("input")?.value;
+    updateFindingNoteButton(btn, activeTooth != null && !!state.findingNotes[findingNoteKey("periodontal", activeTooth, value)]);
+  });
 
   // caries
   $$("#cariesChecks input[type=checkbox]").forEach(c => c.checked = state.caries.has(c.value));
+  $$("#cariesChecks .odon-finding-note-btn").forEach((btn: Any) => {
+    const value = btn.closest("label")?.querySelector("input")?.value;
+    updateFindingNoteButton(btn, activeTooth != null && !!state.findingNotes[findingNoteKey("caries", activeTooth, value)]);
+  });
 
   // filling surfaces
   $$("#fillingSurfaceChecks input[type=checkbox]").forEach(c => c.checked = state.fillingSurfaces.has(c.value));
@@ -1911,6 +1968,85 @@ function hideNoteEditor(){
   if(backdrop) backdrop.remove();
 }
 
+// ---- Per-finding Note Editor Popover ----
+// Same visual language as showNoteEditor, but scoped to one specific finding
+// (e.g. "caries-mesial" on the active tooth) instead of the whole tooth, keyed
+// with the same id scheme used by extractClinicalFindingsFromSnapshot on the
+// app side (`${prefix}:${toothNo}:${value}`), so notes map 1:1 onto findings.
+function findingNoteKey(prefix: Any, toothNo: Any, value: Any){
+  return [prefix, toothNo, value].filter((p) => p !== null && p !== undefined && p !== "").join(":");
+}
+
+function updateFindingNoteButton(btn: Any, hasNote: Any){
+  if(!btn) return;
+  btn.classList.toggle("odon-finding-note-btn-active", !!hasNote);
+}
+
+function showFindingNoteEditor(prefix: Any, value: Any, anchorEl: Any){
+  hideNoteEditor();
+  if(!notesEnabled || readOnly) return;
+  if(activeTooth == null) return;
+  const toothNo = activeTooth;
+  const state = toothState.get(toothNo);
+  if(!state) return;
+  const key = findingNoteKey(prefix, toothNo, value);
+
+  const popover = el("div", { class: "odon-note-popover" });
+
+  const header = el("div", { class: "odon-note-header" });
+  const title = el("span", { class: "odon-note-title", text: t("note.title") });
+  const closeBtn = el("button", { class: "odon-zoom-close", text: "✕" });
+  closeBtn.addEventListener("click", hideNoteEditor);
+  header.appendChild(title);
+  header.appendChild(closeBtn);
+
+  const textarea = document.createElement("textarea");
+  textarea.className = "odon-note-textarea";
+  textarea.value = state.findingNotes[key] || "";
+  textarea.placeholder = t("note.placeholder");
+  textarea.rows = 3;
+
+  const commit = (nextValue: Any) => {
+    const trimmed = (nextValue || "").trim();
+    if(trimmed) state.findingNotes[key] = trimmed;
+    else delete state.findingNotes[key];
+    updateFindingNoteButton(anchorEl, !!state.findingNotes[key]);
+    hideNoteEditor();
+    notifyChange();
+  };
+
+  const actions = el("div", { class: "odon-note-actions" });
+  const saveBtn = el("button", { class: "odon-zoom-btn", text: t("note.save") });
+  saveBtn.addEventListener("click", () => commit(textarea.value));
+  const deleteBtn = el("button", { class: "odon-zoom-btn danger", text: t("note.delete") });
+  deleteBtn.addEventListener("click", () => commit(""));
+  actions.appendChild(saveBtn);
+  actions.appendChild(deleteBtn);
+
+  popover.appendChild(header);
+  popover.appendChild(textarea);
+  popover.appendChild(actions);
+
+  const backdrop = el("div", { class: "odon-note-backdrop" });
+  backdrop.addEventListener("click", hideNoteEditor);
+  backdrop.appendChild(popover);
+  document.body.appendChild(backdrop);
+  popover.addEventListener("click", (e: Any) => e.stopPropagation());
+
+  const rect = anchorEl.getBoundingClientRect();
+  const pw = 280;
+  let left = rect.left;
+  let top = rect.bottom + 8;
+  if(left + pw > window.innerWidth - 8) left = window.innerWidth - pw - 8;
+  if(left < 8) left = 8;
+  if(top + 170 > window.innerHeight) top = rect.top - 178;
+  popover.style.position = "fixed";
+  popover.style.left = left + "px";
+  popover.style.top = top + "px";
+
+  textarea.focus();
+}
+
 // ---- Touch: Pinch-to-zoom ----
 function getTouchDist(t1: Touch, t2: Touch){
   const dx = t1.clientX - t2.clientX;
@@ -2222,6 +2358,14 @@ function setHealthyPulpVisible(on: Any){
   }
 }
 
+/** Toggle visibility of the primary (deciduous) dentition row, FDI 51-85. */
+function setPrimaryDentitionVisible(on: Any){
+  primaryDentitionVisible = !!on;
+  setToggleButton($("#btnPrimaryDentitionView"), primaryDentitionVisible);
+  const grid = $("#toothGrid");
+  if(grid) grid.classList.toggle("odon-show-primary", primaryDentitionVisible);
+}
+
 function serializeState(s: any){
   return {
     toothSelection: s.toothSelection,
@@ -2252,6 +2396,8 @@ function serializeState(s: any){
     crownMaterial: s.crownMaterial,
     ...(Object.keys(s.customStates || {}).length > 0 ? { customStates: s.customStates } : {}),
     ...(s.note ? { note: s.note } : {}),
+    ...(s.periodontal ? { periodontal: s.periodontal } : {}),
+    ...(Object.keys(s.findingNotes || {}).length > 0 ? { findingNotes: s.findingNotes } : {}),
   };
 }
 
@@ -2306,6 +2452,21 @@ export function hydrateState(raw: any){
   s.crownMaterial = validateEnum(raw.crownMaterial, VALID_CROWN_MATERIAL, s.crownMaterial);
   // Restore note
   if(typeof raw.note === "string") s.note = raw.note;
+  // Restore simplified periodontal chart (probing depth / attachment loss)
+  if(raw.periodontal && typeof raw.periodontal === "object"){
+    const probingDepth = Number(raw.periodontal.probingDepth);
+    const attachmentLoss = Number(raw.periodontal.attachmentLoss);
+    const periodontal: { probingDepth?: number; attachmentLoss?: number } = {};
+    if(Number.isFinite(probingDepth) && probingDepth >= 0 && probingDepth <= 15) periodontal.probingDepth = probingDepth;
+    if(Number.isFinite(attachmentLoss) && attachmentLoss >= 0 && attachmentLoss <= 15) periodontal.attachmentLoss = attachmentLoss;
+    if(Object.keys(periodontal).length > 0) s.periodontal = periodontal;
+  }
+  // Restore per-finding notes (only string values, keyed by finding id)
+  if(raw.findingNotes && typeof raw.findingNotes === "object"){
+    for(const [key, val] of Object.entries(raw.findingNotes)){
+      if(typeof val === "string" && val.trim()) s.findingNotes[key] = val;
+    }
+  }
   // Restore plugin custom states (only for registered plugin IDs)
   if(raw.customStates && typeof raw.customStates === "object"){
     const validIds = new Set(registeredPlugins.map(p => p.id));
@@ -2556,7 +2717,7 @@ async function buildGrid(token: number){
   ]);
   if(!initialized || token !== initToken) return;
 
-  function addTile({toothNo, tplNo, rot, mirror, view, clickable}: Any){
+  function addTile({toothNo, tplNo, rot, mirror, view, clickable, extraClass}: Any){
     if(!initialized || token !== initToken) return;
     const tpl = view === "occl" ? occlCache.get(tplNo) : tplCache.get(tplNo);
     if(!tpl) return;
@@ -2564,16 +2725,18 @@ async function buildGrid(token: number){
     if(rot === 180) rotate180(svg);
     if(mirror) mirrorVertical(svg);
 
+    const isLowerArch = (toothNo >= 31 && toothNo <= 48) || (toothNo >= 71 && toothNo <= 85);
     const tileClasses = [
       "odon-tooth-tile",
       "tooth-tile",
       `odon-tpl-${tplNo}`,
       `tpl-${tplNo}`,
-      toothNo >= 31 ? "odon-lower-row" : "odon-upper-row",
+      isLowerArch ? "odon-lower-row" : "odon-upper-row",
       view === "occl" ? "odon-occl-view" : "odon-side-view",
       view === "occl" ? "occl-view" : "side-view",
     ];
     if(!clickable) tileClasses.push("odon-placeholder", "placeholder");
+    if(extraClass) tileClasses.push(extraClass);
 
     const tile = el("div", { class: tileClasses.join(" "), "data-tooth": String(toothNo) }, [
       el("div", { class:"odon-tooth-svg" })
@@ -2624,11 +2787,25 @@ async function buildGrid(token: number){
     return null;
   }
 
-  function addPlaceholderTile(){
-    const tile = el("div", { class:"odon-tooth-tile tooth-tile odon-occl-view occl-view odon-placeholder placeholder" }, [
+  function addPlaceholderTile(extraClass?: Any){
+    const classes = ["odon-tooth-tile", "tooth-tile", "odon-occl-view", "occl-view", "odon-placeholder", "placeholder"];
+    if(extraClass) classes.push(extraClass);
+    const tile = el("div", { class: classes.join(" ") }, [
       el("div", { class:"odon-tooth-svg" })
     ]);
     grid.appendChild(tile);
+  }
+
+  function addRowSidePrimary(rowTeeth: Any){
+    for(const toothNo of rowTeeth){
+      if(toothNo == null){
+        addPlaceholderTile("odon-primary-tile");
+        continue;
+      }
+      const map = TOOTH_TEMPLATE.get(toothNo);
+      const tplNo = map ? map.tpl : 11;
+      addTile({ toothNo, tplNo, rot: map?.rot ?? 0, mirror: map?.mirror ?? false, view: "side", clickable: true, extraClass: "odon-primary-tile" });
+    }
   }
 
   function addRowOccl(rowTeeth: Any, placeholders: Any){
@@ -2658,12 +2835,19 @@ async function buildGrid(token: number){
   const lowerSide = [48,47,46,45,44,43,42,41,31,32,33,34,35,36,37,38];
   const upperOcclPlaceholders = new Set([13,12,11,21,22,23]);
   const lowerOcclPlaceholders = new Set([43,42,41,31,32,33]);
+  // Primary rows are padded to the same 16 columns as the permanent rows so
+  // each primary tooth lines up under its nearest permanent counterpart
+  // (there is no primary equivalent of the 6/7/8-position molars/wisdom teeth).
+  const upperSidePrimary = [null,null,null,55,54,53,52,51,61,62,63,64,65,null,null,null];
+  const lowerSidePrimary = [null,null,null,85,84,83,82,81,71,72,73,74,75,null,null,null];
 
   if(!initialized || token !== initToken) return;
   addLabelRow(upperSide, toothLabelUpper);
   addRowSide(upperSide);
+  addRowSidePrimary(upperSidePrimary);
   addRowOccl(upperSide, upperOcclPlaceholders);
   addRowOccl(lowerSide, lowerOcclPlaceholders);
+  addRowSidePrimary(lowerSidePrimary);
   addRowSide(lowerSide);
   addLabelRow(lowerSide, toothLabelLower);
 
@@ -2834,19 +3018,36 @@ function wireControls(){
     });
   });
 
+  // Periodontal chart (simplified: probing depth / attachment loss, mm)
+  const applyPeriodontalField = (field: "probingDepth" | "attachmentLoss", value: string) => {
+    applyToSelected((s: Any)=>{
+      const num = value === "" ? undefined : Number(value);
+      const next = { ...(s.periodontal || {}) };
+      if(num === undefined || Number.isNaN(num)) delete next[field];
+      else next[field] = num;
+      s.periodontal = Object.keys(next).length > 0 ? next : null;
+    });
+  };
+  bind("#periodontalProbingDepth", "input", (e)=>{
+    applyPeriodontalField("probingDepth", (e.target as HTMLInputElement).value);
+  });
+  bind("#periodontalAttachmentLoss", "input", (e)=>{
+    applyPeriodontalField("attachmentLoss", (e.target as HTMLInputElement).value);
+  });
+
   // Inflammations
   buildChecks($("#modsChecks"), MOD_OPTIONS, (id, on)=>{
     applyToSelected((s)=>{
       if(on) s.mods.add(id); else s.mods.delete(id);
     });
-  });
+  }, "periodontal");
 
   // Caries checks (order)
   buildChecks($("#cariesChecks"), CARIES_OPTIONS, (id, on)=>{
     applyToSelected((s)=>{
       if(on) s.caries.add(id); else s.caries.delete(id);
     });
-  });
+  }, "caries");
 
   // Filling material dropdown
   buildSelect($("#fillingSelect"), getFillingOptions(false), (mat)=>{
@@ -3371,4 +3572,4 @@ export function getNotesEnabled(): boolean{
   return notesEnabled;
 }
 
-export { setOcclusalVisible, setWisdomVisible, setShowBase, setHealthyPulpVisible };
+export { setOcclusalVisible, setWisdomVisible, setShowBase, setHealthyPulpVisible, setPrimaryDentitionVisible };
